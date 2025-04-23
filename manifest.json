@@ -3,8 +3,7 @@
   "name": "Stubber Utilities",
   "version": "1.0",
   "description": "Utilities for working with Stubber references",
-  "permissions": ["contextMenus", "tabs"],
-  "host_permissions": ["<all_urls>"],
+  "permissions": ["contextMenus", "activeTab"],
   "background": {
     "service_worker": "background.js"
   },
