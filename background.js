@@ -2,7 +2,8 @@
 // Regular expression to find StubRef codes in two formats:
 // 1. YYYY-MM-DD-STUB-XXXX where XXXX is 4 alphanumeric characters
 // 2. YYYY-MM-DD-XXXX-XXXX where XXXX is 4 alphanumeric characters
-const stubRefRegex = /(\d{4}-\d{2}-\d{2}-(?:STUB|XXXX)-[a-zA-Z0-9]{4})/i;
+const stubRefRegex =
+  /\b\d{4}-\d{2}-\d{2}-(?:STUB|[a-zA-Z0-9]{4})-[a-zA-Z0-9]{4}\b/i;
 const uuidV5Regex =
   /\b[0-9a-f]{8}-[0-9a-f]{4}-5[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}\b/i;
 
@@ -40,16 +41,22 @@ function openUrl(url) {
 
 // Create the context menu item
 chrome.runtime.onInstalled.addListener(() => {
-  contextMenus.forEach((menu) => chrome.contextMenus.create(menu));
+  chrome.contextMenus.removeAll(() => {
+    contextMenus.forEach((menu) => chrome.contextMenus.create(menu));
+  });
 });
 
 chrome.contextMenus.onShown.addListener((info) => {
   const uuid = getFirstMatch(info.selectionText || "", uuidV5Regex);
   const hasUuid = Boolean(uuid);
 
-  chrome.contextMenus.update("openStubberOrg", { visible: hasUuid });
-  chrome.contextMenus.update("openStubberTemplate", { visible: hasUuid });
-  chrome.contextMenus.refresh();
+  chrome.contextMenus.update("openStubberOrg", { visible: hasUuid }, () => {
+    chrome.contextMenus.update(
+      "openStubberTemplate",
+      { visible: hasUuid },
+      () => chrome.contextMenus.refresh(),
+    );
+  });
 });
 
 // Handle context menu click
