@@ -13,6 +13,11 @@ const contextMenus = [
     title: "Open in Stubber",
     contexts: ["selection"],
   },
+  {
+    id: "openStubberChat",
+    title: "Open in Stubber (chat view)",
+    contexts: ["selection"],
+  },
 ];
 
 function getFirstMatch(text, regex) {
@@ -34,6 +39,16 @@ function getStubberUrl(text) {
   }
 
   return undefined;
+}
+
+function getStubberChatUrl(text) {
+  const stubRef = getFirstMatch(text, stubRefRegex);
+
+  if (!stubRef) {
+    return undefined;
+  }
+
+  return `https://app.stubber.com/stubber_system/chat/${stubRef}`;
 }
 
 function openUrl(url) {
@@ -72,14 +87,31 @@ addChromeListener(
 
 // Handle context menu click
 addChromeListener(chrome.contextMenus?.onClicked, (info, tab) => {
-  if (info.menuItemId !== "openStubber" || !info.selectionText) {
+  if (!info.selectionText) {
     return;
   }
 
-  const url = getStubberUrl(info.selectionText);
+  const urlByMenuId = {
+    openStubber: {
+      getUrl: getStubberUrl,
+      notFoundMessage: "No valid StubRef or v5 UUID found in selection",
+    },
+    openStubberChat: {
+      getUrl: getStubberChatUrl,
+      notFoundMessage: "No valid StubRef found in selection",
+    },
+  };
+
+  const menuConfig = urlByMenuId[info.menuItemId];
+
+  if (!menuConfig) {
+    return;
+  }
+
+  const url = menuConfig.getUrl(info.selectionText);
 
   if (!url) {
-    console.log("No valid StubRef or v5 UUID found in selection");
+    console.log(menuConfig.notFoundMessage);
     return;
   }
 

@@ -5,6 +5,7 @@
 # Features
 
 - Open selected Stubber references in Stubber.
+- Open selected Stubber references in the Stubber chat view.
 - When selected text contains a version 5 UUID, open it as a Stubber org or Stubber template.
 
 # Updating
